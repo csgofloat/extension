@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            body {
+                width: 300px;
+                padding: 16px;
+                background-color: #15171c;
+            }
+            button {
+                width: 100%;
+                padding: 10px;
+                background-color: rgba(35, 123, 255, 0.15);
+                color: #237bff;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-family: 'Roboto', serif;
+                font-size: 14px;
+                font-weight: 500;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 8px;
+            }
+            button:hover {
+                background-color: #2a374d;
+            }
+            button:disabled {
+                cursor: not-allowed;
+            }
+        </style>
+    </head>
+    <body>
+        <button id="requestPermissions">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <path
+                    d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
+                />
+                <path d="M12 8v4" />
+                <path d="M12 16h.01" />
+            </svg>
+            <span>Grant Required Permissions</span>
+        </button>
+        <script src="popup/popup.js"></script>
+    </body>
+</html>

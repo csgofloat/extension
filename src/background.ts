@@ -5,6 +5,7 @@ import {alarmListener, registerTradeAlarmIfPossible} from './lib/alarms/setup';
 import {pingTradeStatus} from './lib/alarms/csfloat_trade_pings';
 import {gStore} from './lib/storage/store';
 import {StorageKey} from './lib/storage/keys';
+import {isFirefox} from './lib/utils/detect';
 
 function unifiedHandler(request: any, sender: MessageSender, sendResponse: (response?: any) => void) {
     Handle(request, sender)
@@ -24,7 +25,7 @@ function unifiedHandler(request: any, sender: MessageSender, sendResponse: (resp
         });
 }
 
-function requestPermissions(permissions: string[], origins: string[], sendResponse: any) {
+function requestPermissions(permissions: chrome.runtime.ManifestPermissions[], origins: string[], sendResponse: any) {
     chrome.permissions.request({permissions, origins}, (granted) => sendResponse(granted));
 
     return true;
@@ -66,3 +67,39 @@ async function checkTradeStatus() {
     }
 }
 checkTradeStatus();
+
+if (isFirefox()) {
+    // Need to manually update the rule to allow the extension to send trade offers
+    // Since Firefox IDs are random and we still want to scope it to only this extension
+    browser.declarativeNetRequest
+        .updateDynamicRules({
+            removeRuleIds: [1738196326],
+            addRules: [
+                {
+                    id: 1738196326,
+                    priority: 2,
+                    action: {
+                        type: 'modifyHeaders',
+                        requestHeaders: [
+                            {
+                                header: 'referer',
+                                operation: 'set',
+                                value: 'https://steamcommunity.com/tradeoffer/new',
+                            },
+                        ],
+                    },
+                    condition: {
+                        urlFilter: 'https://steamcommunity.com/tradeoffer/new/send',
+                        resourceTypes: ['xmlhttprequest'],
+                        initiatorDomains: [new URL(browser.runtime.getURL('')).hostname],
+                    },
+                },
+            ],
+        })
+        .then(() => {
+            console.log('[INFO] Successfully updated ruleset');
+        })
+        .catch((e) => {
+            console.error('[ERROR] Failed to update ruleset for Firefox');
+        });
+}

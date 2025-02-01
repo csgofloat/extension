@@ -21,13 +21,16 @@ function getPathEntries(path) {
 
 function convertToFirefoxManifest(manifest) {
     const cp = Object.assign({}, manifest);
+    cp.action = {
+		default_popup: "src/popup.html"
+    }
     cp.background = {
         page: 'src/background_ff.html',
     };
     cp.browser_specific_settings = {
         gecko: {
             id: '{194d0dc6-7ada-41c6-88b8-95d7636fe43c}',
-            strict_min_version: '109.0',
+            strict_min_version: '127.0',
         },
     };
     // Allow getting the extension version from CSFloat page in Firefox
@@ -48,6 +51,7 @@ module.exports = (env) => {
             getPathEntries('./src/lib/page_scripts/*.ts'),
             getPathEntries('./src/lib/types/*.d.ts'),
             getPathEntries('./src/background.ts'),
+            getPathEntries('./src/popup/popup.ts'),
             getPathEntries('./src/**/*.js')
         ),
         output: {
@@ -97,6 +101,7 @@ module.exports = (env) => {
                     {from: 'src/steamcommunity_ruleset.json', to: 'src/', context: '.'},
                     {from: 'src', to: 'raw/', context: '.'},
                     {from: 'README.md', to: '', context: '.'},
+                    {from: 'src/popup/popup.html', to: 'src/', context: '.'},
                     {
                         from: 'manifest.json',
                         to: 'manifest.json',
