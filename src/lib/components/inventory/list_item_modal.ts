@@ -21,10 +21,19 @@ export class ListItemModal extends FloatElement {
     private recommendedPrice: number | undefined;
 
     @state()
+    private listingType: 'buy_now' | 'auction' = 'buy_now';
+
+    @state()
     private customPrice: number | undefined;
 
     @state()
     private pricePercentage: number = 100;
+
+    @state()
+    private maxOfferDiscount: number = 0;
+
+    @state()
+    private auctionDuration: 1 | 3 | 5 | 7 | 14 = 7;
 
     @state()
     private isLoading: boolean = false;
@@ -108,11 +117,62 @@ export class ListItemModal extends FloatElement {
                 color: #ffffff;
                 font-size: 16px;
                 cursor: pointer;
+                margin-top: 10px;
             }
 
             .submit-button:disabled {
                 background: #2a475e;
                 cursor: not-allowed;
+            }
+
+            .listing-type-selector {
+                margin-bottom: 20px;
+                display: flex;
+                gap: 10px;
+            }
+
+            .type-button {
+                flex: 1;
+                padding: 10px;
+                background: #2a475e;
+                border: 1px solid #000000;
+                color: #ffffff;
+                cursor: pointer;
+            }
+
+            .type-button.active {
+                background: #66c0f4;
+            }
+
+            .auction-settings {
+                margin-top: 10px;
+            }
+
+            .duration-select {
+                width: 100%;
+                padding: 8px;
+                margin-top: 5px;
+                background: #2a475e;
+                border: 1px solid #000000;
+                color: #ffffff;
+            }
+
+            .description-input {
+                width: 100%;
+                padding: 8px;
+                margin-top: 5px;
+                background: #2a475e;
+                border: 1px solid #000000;
+                color: #ffffff;
+                resize: vertical;
+                min-height: 60px;
+            }
+
+            .checkbox-container {
+                margin-top: 10px;
+                display: flex;
+                align-items: center;
+                gap: 5px;
             }
         `,
     ];
@@ -160,10 +220,22 @@ export class ListItemModal extends FloatElement {
 
         try {
             this.isLoading = true;
-            const response = await ClientSend(ListItem, {
-                asset_id: this.asset.assetid,
-                price: this.customPrice,
-            });
+
+            const request =
+                this.listingType === 'buy_now'
+                    ? {
+                          type: 'buy_now' as const,
+                          asset_id: this.asset.assetid,
+                          price: this.customPrice,
+                      }
+                    : {
+                          type: 'auction' as const,
+                          asset_id: this.asset.assetid,
+                          reserve_price: this.customPrice,
+                          duration_days: this.auctionDuration,
+                      };
+
+            const response = await ClientSend(ListItem, request);
 
             if (!response.success) {
                 throw new Error(response.error || 'Failed to list item');
@@ -172,7 +244,8 @@ export class ListItemModal extends FloatElement {
             this.dispatchEvent(new CustomEvent('close'));
             window.location.reload(); // Refresh to show updated listing status
         } catch (error) {
-            this.error = 'Failed to list item. Make sure you are logged into CSFloat.';
+            this.error =
+                error instanceof Error ? error.message : 'Failed to list item. Make sure you are logged into CSFloat.';
             console.error(error);
         } finally {
             this.isLoading = false;
@@ -195,6 +268,21 @@ export class ListItemModal extends FloatElement {
                         </button>
                     </div>
 
+                    <div class="listing-type-selector">
+                        <button
+                            class="type-button ${this.listingType === 'buy_now' ? 'active' : ''}"
+                            @click="${() => (this.listingType = 'buy_now')}"
+                        >
+                            Buy Now
+                        </button>
+                        <button
+                            class="type-button ${this.listingType === 'auction' ? 'active' : ''}"
+                            @click="${() => (this.listingType = 'auction')}"
+                        >
+                            Auction
+                        </button>
+                    </div>
+
                     <div class="price-section">
                         <label>
                             Recommended Price:
@@ -211,7 +299,9 @@ export class ListItemModal extends FloatElement {
                             class="price-input"
                             .value="${this.customPrice ? (this.customPrice / 100).toFixed(2) : ''}"
                             @input="${this.handlePriceChange}"
-                            placeholder="Enter price in USD"
+                            placeholder="${this.listingType === 'buy_now'
+                                ? 'Enter listing price in USD'
+                                : 'Enter starting price in USD'}"
                         />
                         <input
                             type="range"
@@ -222,6 +312,31 @@ export class ListItemModal extends FloatElement {
                             class="percentage-slider"
                         />
                         <div>Percentage of recommended price: ${this.pricePercentage.toFixed(1)}%</div>
+
+                        ${this.listingType === 'auction'
+                            ? html`
+                                  <div class="auction-settings">
+                                      <label>Auction Duration</label>
+                                      <select
+                                          class="duration-select"
+                                          .value="${this.auctionDuration}"
+                                          @change="${(e: Event) =>
+                                              (this.auctionDuration = Number((e.target as HTMLSelectElement).value) as
+                                                  | 1
+                                                  | 3
+                                                  | 5
+                                                  | 7
+                                                  | 14)}"
+                                      >
+                                          <option value="1">1 Day</option>
+                                          <option value="3">3 Days</option>
+                                          <option value="5">5 Days</option>
+                                          <option value="7">7 Days</option>
+                                          <option value="14">14 Days</option>
+                                      </select>
+                                  </div>
+                              `
+                            : ''}
                     </div>
 
                     ${this.error ? html`<div class="error-message">${this.error}</div>` : ''}
@@ -231,7 +346,11 @@ export class ListItemModal extends FloatElement {
                         ?disabled="${this.isLoading || !this.customPrice}"
                         @click="${this.handleSubmit}"
                     >
-                        ${this.isLoading ? 'Listing...' : 'List Item'}
+                        ${this.isLoading
+                            ? 'Listing...'
+                            : this.listingType === 'buy_now'
+                            ? 'List for Sale'
+                            : 'Start Auction'}
                     </button>
                 </div>
             </div>
