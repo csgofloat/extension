@@ -28,6 +28,7 @@ type ListItemRequest = BuyNowListItemRequest | AuctionListItemRequest;
 interface ListItemResponse {
     success: boolean;
     error?: string;
+    id?: string;
 }
 
 export const ListItem = new SimpleHandler<ListItemRequest, ListItemResponse>(RequestType.LIST_ITEM, async (req) => {
@@ -45,7 +46,9 @@ export const ListItem = new SimpleHandler<ListItemRequest, ListItemResponse>(Req
         throw new Error(error || 'Failed to list item');
     }
 
+    const data = await response.json();
     return {
         success: true,
+        id: data.id,
     };
 });

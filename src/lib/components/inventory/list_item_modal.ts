@@ -41,6 +41,9 @@ export class ListItemModal extends FloatElement {
     @state()
     private error: string | undefined;
 
+    @state()
+    private listingId: string | undefined;
+
     static styles = [
         ...FloatElement.styles,
         css`
@@ -174,6 +177,64 @@ export class ListItemModal extends FloatElement {
                 align-items: center;
                 gap: 5px;
             }
+
+            .success-content {
+                text-align: center;
+                padding: 20px 0;
+            }
+
+            .success-emoji {
+                font-size: 48px;
+                margin-bottom: 10px;
+            }
+
+            .success-title {
+                font-size: 18px;
+                color: #ffffff;
+                margin-bottom: 20px;
+            }
+
+            .success-links {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+
+            .success-link {
+                padding: 10px;
+                background: #2a475e;
+                border: 1px solid #000000;
+                border-radius: 4px;
+                color: #ffffff;
+                text-decoration: none;
+                transition: background-color 0.2s;
+            }
+
+            .success-link:hover {
+                background: #3d6c8d;
+            }
+
+            .divider {
+                border-top: 1px solid #4b5f73;
+                margin: 20px 0;
+            }
+
+            .close-modal-button {
+                width: 100%;
+                padding: 10px;
+                background: #2a475e;
+                border: none;
+                border-radius: 20px;
+                color: #ffffff;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }
+
+            .close-modal-button:hover {
+                background: #3d6c8d;
+            }
         `,
     ];
 
@@ -241,8 +302,7 @@ export class ListItemModal extends FloatElement {
                 throw new Error(response.error || 'Failed to list item');
             }
 
-            this.dispatchEvent(new CustomEvent('close'));
-            window.location.reload(); // Refresh to show updated listing status
+            this.listingId = response.id;
         } catch (error) {
             this.error =
                 error instanceof Error ? error.message : 'Failed to list item. Make sure you are logged into CSFloat.';
@@ -253,6 +313,33 @@ export class ListItemModal extends FloatElement {
     }
 
     render(): HTMLTemplateResult {
+        if (this.listingId) {
+            return html`
+                <div class="modal-backdrop">
+                    <div class="modal-content">
+                        <div class="success-content">
+                            <div class="success-emoji">🎉</div>
+                            <div class="success-title">Congrats on listing your item on CSFloat</div>
+                            <div class="success-links">
+                                <a
+                                    href="https://csfloat.com/item/${this.listingId}"
+                                    target="_blank"
+                                    class="success-link"
+                                >
+                                    View ${this.listingType === 'buy_now' ? 'Listing' : 'Auction'}
+                                </a>
+                                <a href="https://csfloat.com/stall/me" target="_blank" class="success-link">
+                                    View Your Stall on CSFloat
+                                </a>
+                            </div>
+                            <div class="divider"></div>
+                            <button class="close-modal-button" @click="${() => window.location.reload()}">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
         return html`
             <div
                 class="modal-backdrop"
