@@ -20,7 +20,6 @@ export interface FetchRecommendedPriceRequest {
 
 export interface FetchRecommendedPriceResponse {
     price: number;
-    listings_used: number;
 }
 
 const MIN_LISTINGS_FOR_AVERAGE = 3;
@@ -52,7 +51,6 @@ async function fetchRecommendedPrice(
             console.error('[FetchRecommendedPrice] API error:', response.status, text);
             return {
                 price: 0,
-                listings_used: 0,
             };
         }
 
@@ -62,7 +60,6 @@ async function fetchRecommendedPrice(
         if (listings.length === 0) {
             return {
                 price: 0,
-                listings_used: 0,
             };
         }
 
@@ -78,7 +75,6 @@ async function fetchRecommendedPrice(
 
         console.log('[FetchRecommendedPrice] Calculated price:', {
             price: averagePrice,
-            listings_used: numListings,
             listings_considered: lowestPricedListings.map((l) => ({
                 price: l.price,
             })),
@@ -86,13 +82,11 @@ async function fetchRecommendedPrice(
 
         return {
             price: averagePrice,
-            listings_used: numListings,
         };
     } catch (error) {
         console.error('[FetchRecommendedPrice] Error fetching listings:', error);
         return {
             price: 0,
-            listings_used: 0,
         };
     }
 }

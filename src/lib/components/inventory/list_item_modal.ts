@@ -255,10 +255,18 @@ export class ListItemModal extends FloatElement {
 
     async connectedCallback() {
         super.connectedCallback();
-        await this.fetchRecommendedPrice();
+        // Only fetch price if the item is tradable
+        if (this.isTradable) {
+            await this.fetchRecommendedPrice();
+        }
     }
 
     async fetchRecommendedPrice() {
+        // Skip if we already have a price or item isn't tradable
+        if (this.recommendedPrice !== undefined || !this.isTradable) {
+            return;
+        }
+
         try {
             this.isLoading = true;
 
@@ -292,10 +300,15 @@ export class ListItemModal extends FloatElement {
     }
 
     private async handleSubmit() {
-        if (!this.customPrice) return;
+        // Validate price before proceeding
+        if (!this.customPrice || isNaN(this.customPrice) || this.customPrice <= 0) {
+            this.error = 'Please enter a valid price greater than $0.00';
+            return;
+        }
 
         try {
             this.isLoading = true;
+            this.error = undefined; // Clear any previous errors
 
             const request =
                 this.listingType === 'buy_now'
