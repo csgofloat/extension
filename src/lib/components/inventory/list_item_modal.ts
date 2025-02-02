@@ -230,7 +230,7 @@ export class ListItemModal extends FloatElement {
                 padding: 10px;
                 background: #2a475e;
                 border: none;
-                border-radius: 20px;
+                border-radius: 4px;
                 color: #ffffff;
                 font-size: 16px;
                 cursor: pointer;
@@ -347,8 +347,7 @@ export class ListItemModal extends FloatElement {
                                     View Your Stall on CSFloat
                                 </a>
                             </div>
-                            <div class="divider"></div>
-                            <button class="close-modal-button" @click="${() => window.location.reload()}">Close</button>
+                            <button class="close-modal-button" @click="${() => window.location.reload()}">Done</button>
                         </div>
                     </div>
                 </div>
