@@ -24,6 +24,8 @@ import {PingStatus} from './ping_status';
 import {FetchOwnInventory} from './fetch_own_inventory';
 import {CancelTradeOffer} from './cancel_trade_offer';
 import {FetchSteamTrades} from './fetch_steam_trades';
+import {ListItem} from './list_item';
+import {FetchRecommendedPrice} from './fetch_recommended_price';
 
 export const HANDLERS_MAP: {[key in RequestType]: RequestHandler<any, any>} = {
     [RequestType.EXECUTE_SCRIPT_ON_PAGE]: ExecuteScriptOnPage,
@@ -50,4 +52,6 @@ export const HANDLERS_MAP: {[key in RequestType]: RequestHandler<any, any>} = {
     [RequestType.FETCH_OWN_INVENTORY]: FetchOwnInventory,
     [RequestType.CANCEL_TRADE_OFFER]: CancelTradeOffer,
     [RequestType.FETCH_STEAM_TRADES]: FetchSteamTrades,
+    [RequestType.LIST_ITEM]: ListItem,
+    [RequestType.FETCH_RECOMMENDED_PRICE]: FetchRecommendedPrice,
 };

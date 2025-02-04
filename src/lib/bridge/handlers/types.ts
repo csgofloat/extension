@@ -23,4 +23,6 @@ export enum RequestType {
     FETCH_OWN_INVENTORY = 21,
     CANCEL_TRADE_OFFER = 22,
     FETCH_STEAM_TRADES = 23,
+    LIST_ITEM = 24,
+    FETCH_RECOMMENDED_PRICE = 25,
 }
