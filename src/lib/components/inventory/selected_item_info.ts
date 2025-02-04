@@ -180,6 +180,11 @@ export class SelectedItemInfo extends FloatElement {
             return html``;
         }
 
+        if (!this.asset?.description?.tradable) {
+            // Don't show if item isn't tradable
+            return html``;
+        }
+
         return html`
             <div class="market-btn-container">
                 <a class="market-btn" @click="${() => (this.showListModal = true)}">
