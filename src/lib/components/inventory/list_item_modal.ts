@@ -4,7 +4,6 @@ import {html, css, HTMLTemplateResult} from 'lit';
 import {property, state} from 'lit/decorators.js';
 import {ItemInfo} from '../../bridge/handlers/fetch_inspect_info';
 import {InventoryAsset} from '../../types/steam';
-import {environment} from '../../../environment';
 import {ClientSend} from '../../bridge/client';
 import {ListItem} from '../../bridge/handlers/list_item';
 import {FetchRecommendedPrice} from '../../bridge/handlers/fetch_recommended_price';
