@@ -30,9 +30,6 @@ export class ListItemModal extends FloatElement {
     private pricePercentage: number = 100;
 
     @state()
-    private maxOfferDiscount: number = 0;
-
-    @state()
     private auctionDuration: 1 | 3 | 5 | 7 | 14 = 7;
 
     @state()
@@ -43,11 +40,6 @@ export class ListItemModal extends FloatElement {
 
     @state()
     private listingId: string | undefined;
-
-    private get isTradable(): boolean {
-        // tradable: 1 means tradable now, 0 means not tradable
-        return this.asset.description.tradable === 1;
-    }
 
     static styles = [
         ...FloatElement.styles,
@@ -255,15 +247,12 @@ export class ListItemModal extends FloatElement {
 
     async connectedCallback() {
         super.connectedCallback();
-        // Only fetch price if the item is tradable
-        if (this.isTradable) {
-            await this.fetchRecommendedPrice();
-        }
+        await this.fetchRecommendedPrice();
     }
 
     async fetchRecommendedPrice() {
-        // Skip if we already have a price or item isn't tradable
-        if (this.recommendedPrice !== undefined || !this.isTradable) {
+        // Skip if we already have a price
+        if (this.recommendedPrice !== undefined) {
             return;
         }
 
@@ -382,91 +371,90 @@ export class ListItemModal extends FloatElement {
                         </button>
                     </div>
 
-                    ${!this.isTradable
-                        ? html` <div class="tradable-warning">This item cannot be traded yet.</div> `
-                        : html`
-                              <div class="listing-type-selector">
-                                  <button
-                                      class="type-button ${this.listingType === 'buy_now' ? 'active' : ''}"
-                                      @click="${() => (this.listingType = 'buy_now')}"
-                                  >
-                                      Buy Now
-                                  </button>
-                                  <button
-                                      class="type-button ${this.listingType === 'auction' ? 'active' : ''}"
-                                      @click="${() => (this.listingType = 'auction')}"
-                                  >
-                                      Auction
-                                  </button>
-                              </div>
+                    <div class="listing-type-selector">
+                        <button
+                            class="type-button ${this.listingType === 'buy_now' ? 'active' : ''}"
+                            @click="${() => (this.listingType = 'buy_now')}"
+                        >
+                            Buy Now
+                        </button>
+                        <button
+                            class="type-button ${this.listingType === 'auction' ? 'active' : ''}"
+                            @click="${() => (this.listingType = 'auction')}"
+                        >
+                            Auction
+                        </button>
+                    </div>
 
-                              <div class="price-section">
-                                  <label>
-                                      Recommended Price:
-                                      ${this.isLoading
-                                          ? 'Loading...'
-                                          : this.recommendedPrice
-                                          ? `$${(this.recommendedPrice / 100).toFixed(2)}`
-                                          : 'N/A'}
-                                  </label>
-                                  <input
-                                      type="number"
-                                      step="0.01"
-                                      min="0"
-                                      class="price-input"
-                                      .value="${this.customPrice ? (this.customPrice / 100).toFixed(2) : ''}"
-                                      @input="${this.handlePriceChange}"
-                                      placeholder="${this.listingType === 'buy_now'
-                                          ? 'Enter listing price in USD'
-                                          : 'Enter starting price in USD'}"
-                                  />
-                                  <input
-                                      type="range"
-                                      min="1"
-                                      max="200"
-                                      .value="${this.pricePercentage}"
-                                      @input="${this.handlePercentageChange}"
-                                      class="percentage-slider"
-                                  />
-                                  <div>Percentage of recommended price: ${this.pricePercentage.toFixed(1)}%</div>
+                    <div class="price-section">
+                        <label>
+                            Recommended Price:
+                            ${this.isLoading
+                                ? 'Loading...'
+                                : this.recommendedPrice
+                                ? `$${(this.recommendedPrice / 100).toFixed(2)}`
+                                : 'N/A'}
+                        </label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            class="price-input"
+                            .value="${this.customPrice ? (this.customPrice / 100).toFixed(2) : ''}"
+                            @input="${this.handlePriceChange}"
+                            placeholder="${this.listingType === 'buy_now'
+                                ? 'Enter listing price in USD'
+                                : 'Enter starting price in USD'}"
+                        />
+                        <input
+                            type="range"
+                            min="1"
+                            max="200"
+                            .value="${this.pricePercentage}"
+                            @input="${this.handlePercentageChange}"
+                            class="percentage-slider"
+                        />
+                        <div>Percentage of recommended price: ${this.pricePercentage.toFixed(1)}%</div>
 
-                                  ${this.listingType === 'auction'
-                                      ? html`
-                                            <div class="auction-settings">
-                                                <label>Auction Duration</label>
-                                                <select
-                                                    class="duration-select"
-                                                    .value="${this.auctionDuration}"
-                                                    @change="${(e: Event) =>
-                                                        (this.auctionDuration = Number(
-                                                            (e.target as HTMLSelectElement).value
-                                                        ) as 1 | 3 | 5 | 7 | 14)}"
-                                                >
-                                                    <option value="1">1 Day</option>
-                                                    <option value="3">3 Days</option>
-                                                    <option value="5">5 Days</option>
-                                                    <option value="7">7 Days</option>
-                                                    <option value="14">14 Days</option>
-                                                </select>
-                                            </div>
-                                        `
-                                      : ''}
-                              </div>
+                        ${this.listingType === 'auction'
+                            ? html`
+                                  <div class="auction-settings">
+                                      <label>Auction Duration</label>
+                                      <select
+                                          class="duration-select"
+                                          .value="${this.auctionDuration}"
+                                          @change="${(e: Event) =>
+                                              (this.auctionDuration = Number((e.target as HTMLSelectElement).value) as
+                                                  | 1
+                                                  | 3
+                                                  | 5
+                                                  | 7
+                                                  | 14)}"
+                                      >
+                                          <option value="1">1 Day</option>
+                                          <option value="3">3 Days</option>
+                                          <option value="5">5 Days</option>
+                                          <option value="7">7 Days</option>
+                                          <option value="14">14 Days</option>
+                                      </select>
+                                  </div>
+                              `
+                            : ''}
+                    </div>
 
-                              ${this.error ? html`<div class="error-message">${this.error}</div>` : ''}
+                    ${this.error ? html`<div class="error-message">${this.error}</div>` : ''}
 
-                              <button
-                                  class="submit-button"
-                                  ?disabled="${this.isLoading || !this.customPrice}"
-                                  @click="${this.handleSubmit}"
-                              >
-                                  ${this.isLoading
-                                      ? 'Listing...'
-                                      : this.listingType === 'buy_now'
-                                      ? 'List for Sale'
-                                      : 'Start Auction'}
-                              </button>
-                          `}
+                    <button
+                        class="submit-button"
+                        ?disabled="${this.isLoading || !this.customPrice}"
+                        @click="${this.handleSubmit}"
+                    >
+                        ${this.isLoading
+                            ? 'Listing...'
+                            : this.listingType === 'buy_now'
+                            ? 'List for Sale'
+                            : 'Start Auction'}
+                    </button>
                 </div>
             </div>
         `;
