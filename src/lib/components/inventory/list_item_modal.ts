@@ -336,7 +336,7 @@ export class ListItemModal extends FloatElement {
                     <div class="modal-content">
                         <div class="success-content">
                             <div class="success-emoji">🎉</div>
-                            <div class="success-title">Congrats on listing your item on CSFloat</div>
+                            <div class="success-title">Congrats on listing your item on CSFloat!</div>
                             <div class="success-links">
                                 <a
                                     href="https://csfloat.com/item/${this.listingId}"
