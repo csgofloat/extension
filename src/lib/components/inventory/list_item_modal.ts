@@ -272,32 +272,59 @@ export class ListItemModal extends FloatElement {
         }
     }
 
-    private handlePriceChange(e: Event) {
-        const value = (e.target as HTMLInputElement).value;
-        this.customPrice = Math.round(Number(parseFloat(value)) * 100);
+    private validatePrice(price: number | undefined): {isValid: boolean; error?: string} {
+        if (!price || isNaN(price) || price <= 0) {
+            return {isValid: false, error: 'Please enter a valid price greater than $0.00'};
+        }
+
+        if (price > 10000000) {
+            // $100,000 in cents
+            return {isValid: false, error: 'Price cannot exceed $100,000 USD'};
+        }
+
+        return {isValid: true};
+    }
+
+    private updatePrice(price: number) {
+        const validation = this.validatePrice(price);
+        if (!validation.isValid) {
+            this.error = validation.error;
+            this.customPrice = undefined;
+            return;
+        }
+
+        this.error = undefined;
+        this.customPrice = price;
         if (this.recommendedPrice) {
             this.pricePercentage = Number(((this.customPrice / this.recommendedPrice) * 100).toFixed(1));
         }
+    }
+
+    private handlePriceChange(e: Event) {
+        const value = (e.target as HTMLInputElement).value;
+        const price = Math.round(Number(parseFloat(value)) * 100);
+        this.updatePrice(price);
     }
 
     private handlePercentageChange(e: Event) {
         const value = (e.target as HTMLInputElement).value;
         this.pricePercentage = Number(parseFloat(value).toFixed(1));
         if (this.recommendedPrice) {
-            this.customPrice = Math.round((this.pricePercentage / 100) * this.recommendedPrice);
+            const newPrice = Math.round((this.pricePercentage / 100) * this.recommendedPrice);
+            this.updatePrice(newPrice);
         }
     }
 
     private async handleSubmit() {
-        // Validate price before proceeding
-        if (!this.customPrice || isNaN(this.customPrice) || this.customPrice <= 0) {
-            this.error = 'Please enter a valid price greater than $0.00';
+        const validation = this.validatePrice(this.customPrice);
+        if (!validation.isValid || !this.customPrice) {
+            this.error = validation.error;
             return;
         }
 
         try {
             this.isLoading = true;
-            this.error = undefined; // Clear any previous errors
+            this.error = undefined;
 
             const request =
                 this.listingType === 'buy_now'
@@ -399,12 +426,13 @@ export class ListItemModal extends FloatElement {
                             type="number"
                             step="0.01"
                             min="0"
+                            max="100000"
                             class="price-input"
                             .value="${this.customPrice ? (this.customPrice / 100).toFixed(2) : ''}"
                             @input="${this.handlePriceChange}"
                             placeholder="${this.listingType === 'buy_now'
-                                ? 'Enter listing price in USD'
-                                : 'Enter starting price in USD'}"
+                                ? 'Enter listing price in USD (max $100,000)'
+                                : 'Enter starting price in USD (max $100,000)'}"
                         />
                         <input
                             type="range"
